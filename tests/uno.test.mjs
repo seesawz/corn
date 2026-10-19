@@ -26,7 +26,6 @@ test('启动页样式也由 UnoCSS 生成，不依赖内联 style', async () => 
   const { css } = await uno.generate('')
   assert.ok(!source.includes('<style'))
   assert.ok(css.includes('.startup-screen'))
-  assert.ok(css.includes('.startup-logo'))
   assert.ok(css.includes('prefers-reduced-motion'))
 })
 

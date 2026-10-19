@@ -73,7 +73,7 @@ const emptyCopy = computed(() => search.value
 <template>
   <!-- 动效基调：进场 swift-out（快出缓停）更"贵"；布局位移用近临界弹簧（快速归位、几乎无回弹） -->
   <MotionConfig reduced-motion="user" :skip-animations="reducedMotion" :transition="{ duration: 0.2, ease: [0.22, 1, 0.36, 1], layout: { type: 'spring', stiffness: 400, damping: 35 } }">
-    <div v-if="!ready" class="startup-screen" role="status" aria-label="正在恢复登录状态"><span class="startup-logo" aria-hidden="true"><BrandIcon /></span></div>
+    <div v-if="!ready" class="startup-screen" role="status">正在加载…</div>
     <AuthPanel v-else-if="configured && !user && !isGuestMode" />
     <div v-else :key="user?.id || 'guest'" class="app">
       <TheSidebar />

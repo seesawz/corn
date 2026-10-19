@@ -53,7 +53,7 @@ export default defineConfig({
   presets: [presetWind3()],
   content: { filesystem: ['app/**/*.{vue,html}'] },
   // Nuxt 的启动模板在 Vue/Vite 模块之外，显式保留首屏所需类。
-  safelist: ['startup-screen', 'startup-logo'],
+  safelist: ['startup-screen'],
   theme: {
     colors: {
       surface: 'var(--bg)', panel: 'var(--panel)', card: 'var(--card)',
@@ -193,7 +193,6 @@ export default defineConfig({
     'task-empty-sub': 'm-0 text-13px text-subtle',
     toast: 'fixed left-1/2 bottom-28px [translate:-50%_0] flex items-center gap-14px py-10px pr-10px pl-16px bg-toast text-toast-text border border-solid border-edge rounded-12px shadow-soft text-13.5px max-w-[min(90vw,480px)] z-10',
     'toast-undo': 'border-0 rounded-8px py-5px px-12px bg-accent text-white font-500 cursor-pointer transition-colors duration-150 shrink-0 hover:bg-accent-strong',
-    'startup-screen': 'fixed inset-0 grid place-items-center bg-surface',
-    'startup-logo': 'text-accent [&_svg]:block [&_svg]:w-40px [&_svg]:h-40px',
+    'startup-screen': 'fixed inset-0 grid place-items-center bg-surface text-13px text-muted',
   },
 })
