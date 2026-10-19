@@ -57,6 +57,8 @@ test('数据库 RLS：匿名拒绝、用户隔离、禁止伪造归属、旧访�
     await db.exec(`reset role`)
     assert.equal((await db.query(`select * from tasks where user_id is null`)).rows.length, 1)
     assert.equal((await db.query(`select * from projects where user_id is null`)).rows.length, 1)
+    // 手动排序持久化：迁移给已有数据补 position 列并默认 0
+    assert.equal((await db.query(`select position from tasks where user_id is null`)).rows[0].position, 0)
     assert.equal((await db.query(`select name from projects where user_id='${a}'`)).rows[0].name, 'A inbox')
   } finally { await db.close() }
 })

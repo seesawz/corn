@@ -55,6 +55,7 @@ interface DbTask {
   due: string | null
   starred: boolean
   tags: string[] | null
+  position: number
   created_at: string
   completed_at: string | null
 }
@@ -69,6 +70,7 @@ function fromDb(row: DbTask): Task {
     due: row.due ?? null,
     starred: !!row.starred,
     tags: row.tags ?? [],
+    position: Number.isFinite(row.position) ? row.position : 0,
     createdAt: new Date(row.created_at).getTime() || Date.now(),
     completedAt: row.completed_at ? new Date(row.completed_at).getTime() : null,
   }
@@ -86,6 +88,7 @@ function toDb(t: Task): DbTask {
     due: t.due,
     starred: t.starred,
     tags: t.tags,
+    position: t.position,
     created_at: new Date(t.createdAt).toISOString(),
     completed_at: t.completedAt ? new Date(t.completedAt).toISOString() : null,
   }
@@ -142,6 +145,7 @@ function normalize(t: Partial<Task>): Task {
     due: typeof t.due === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(t.due) ? t.due : null,
     starred: !!t.starred,
     tags: Array.isArray(t.tags) ? t.tags.map(String) : [],
+    position: Number.isFinite(t.position) ? t.position : 0,
     createdAt: t.createdAt || Date.now(),
     completedAt: t.completedAt ?? null,
   }
@@ -212,7 +216,9 @@ async function initTasks(authClient: SupabaseClient | null = null, userId = '', 
     await new Promise(resolve => setTimeout(resolve, 0))
     if (requestGeneration !== generation) return
     const [taskResult, projectResult] = await Promise.all([
-      authClient.from('tasks').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+      // 手动排序持久化：按 position 排；旧数据 position 全为 0 时退回 created_at，行为与升级前一致
+      authClient.from('tasks').select('*').eq('user_id', userId)
+        .order('position', { ascending: true }).order('created_at', { ascending: false }),
       authClient.from('projects').select('id, name, icon').eq('user_id', userId).order('created_at'),
     ])
     if (requestGeneration !== generation) return
@@ -264,6 +270,8 @@ const filtered = computed<Task[]>(() => {
   const q = search.value.trim().toLowerCase()
   return projectTasks.value.filter(t => !q || t.text.toLowerCase().includes(q)
     || t.tags.some(tag => tag.toLowerCase().includes(q)))
+    // 收藏（星标）任务优先展示，排序稳定，组内保持原有（手动拖拽）顺序
+    .sort((a, b) => Number(b.starred) - Number(a.starred))
 })
 const counts = computed(() => Object.fromEntries(projects.value.map(p => [
   p.id, tasks.value.filter(t => t.projectId === p.id && !t.done).length,
@@ -301,13 +309,9 @@ function renameProject(id: string, name: string, icon?: ProjectIconName): boolea
   return true
 }
 
-function moveTask(id: string, targetProjectId: string) {
-  if (!writable.value) return
-  const task = tasks.value.find(t => t.id === id)
-  if (!task || !projects.value.some(p => p.id === targetProjectId)) return
-  task.projectId = targetProjectId
-  saveLocal()
-  cloudWrite(c => c.from('tasks').update({ project_id: targetProjectId }).eq('user_id', ownerId).eq('id', id))
+// 项目内「置顶」位置：取该项目最小 position - 1（空项目或旧数据全为 0 时即 -1）
+function topPosition(targetProjectId: string, excludeId = ''): number {
+  return Math.min(0, ...tasks.value.filter(t => t.projectId === targetProjectId && t.id !== excludeId).map(t => t.position)) - 1
 }
 
 // ---------- 操作 ----------
@@ -316,10 +320,21 @@ function addTask(raw: string): boolean {
   const p = parseInput(raw)
   if (!p.text && p.tags.length === 0) return false
   const t = normalize({ ...p, projectId: projectId.value, createdAt: Date.now() })
+  t.position = topPosition(t.projectId)
   tasks.value.unshift(t)
   saveLocal()
   cloudWrite(c => c.from('tasks').insert(toDb(t)))
   return true
+}
+
+function moveTask(id: string, targetProjectId: string) {
+  if (!writable.value) return
+  const task = tasks.value.find(t => t.id === id)
+  if (!task || !projects.value.some(p => p.id === targetProjectId)) return
+  task.projectId = targetProjectId
+  task.position = topPosition(targetProjectId, id) // 移入后置顶
+  saveLocal()
+  cloudWrite(c => c.from('tasks').update({ project_id: targetProjectId, position: task.position }).eq('user_id', ownerId).eq('id', id))
 }
 
 function toggleDone(id: string) {
@@ -381,7 +396,7 @@ function undoRemove() {
   const { task, index } = undoState
   tasks.value.splice(Math.min(index, tasks.value.length), 0, task)
   saveLocal()
-  cloudWrite(c => c.from('tasks').insert(toDb(task)))
+  renumber(task) // upsert 同时完成恢复写入，并保证项目内 position 与新顺序一致
   hideToast()
 }
 
@@ -399,6 +414,13 @@ function clearDone() {
   cloudWrite(c => c.from('tasks').delete().eq('user_id', ownerId).in('id', removedIds))
 }
 
+// 项目内按当前数组顺序重排 position；云端整体 upsert，刷新后顺序保留
+function renumber(task: Task) {
+  const siblings = tasks.value.filter(t => t.projectId === task.projectId)
+  siblings.forEach((t, i) => { t.position = i })
+  cloudWrite(c => c.from('tasks').upsert(siblings.map(toDb)))
+}
+
 function reorder(dragId: string, targetId: string, before: boolean) {
   if (!writable.value) return
   const from = tasks.value.findIndex(t => t.id === dragId)
@@ -411,7 +433,7 @@ function reorder(dragId: string, targetId: string, before: boolean) {
     tasks.value.splice(to, 0, item)
   }
   saveLocal()
-  // 简单策略：顺序仅存本地（云端保留服务器排序），刷新后以云端顺序为准
+  renumber(item)
 }
 
 export function useTasks() {

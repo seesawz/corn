@@ -15,12 +15,16 @@ create table if not exists public.tasks (
   due          date,
   starred      boolean not null default false,
   tags         text[] not null default '{}',
+  position     int not null default 0,          -- 项目内手动排序，越小越靠前；客户端整体重排
   created_at   timestamptz not null default now(),
   completed_at timestamptz
 );
 
 -- 升级已有任务：未分配项目的任务归入收件箱
 alter table public.tasks add column if not exists project_id text not null default 'inbox';
+
+-- 手动拖拽排序持久化：已有任务默认 0，前端按 (position asc, created_at desc) 排序，升级后行为不变
+alter table public.tasks add column if not exists position int not null default 0;
 
 create table if not exists public.projects (
   id         text not null,

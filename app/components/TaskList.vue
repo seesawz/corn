@@ -17,6 +17,9 @@ let dropTarget: { id: string, before: boolean } | null = null
 const draggingId = ref<string | null>(null)
 const dropMark = ref<{ id: string, before: boolean } | null>(null)
 
+// 列表按星标优先排序（见 useTasks 的 filtered）：首项为星标时显示分组标签
+const starredHead = computed(() => props.tasks[0]?.starred === true)
+
 function onDragStart(e: DragEvent) {
   if (!canDrag.value) return
   const id = (e.target as HTMLElement).closest<HTMLElement>('.task')?.dataset.id
@@ -33,6 +36,10 @@ function onDragOver(e: DragEvent) {
   dropMark.value = null
   dropTarget = null
   if (!li || li.dataset.id === dragId) return
+  // 星标任务始终置顶：跨星标组的拖放不会生效，不显示插入线
+  const dragTask = props.tasks.find(t => t.id === dragId)
+  const targetTask = props.tasks.find(t => t.id === li.dataset.id)
+  if (!dragTask || !targetTask || dragTask.starred !== targetTask.starred) return
   const r = li.getBoundingClientRect()
   const before = e.clientY < r.top + r.height / 2
   dropMark.value = { id: li.dataset.id!, before }
@@ -62,6 +69,10 @@ function onDragEnd() {
     <AnimatePresence :initial="false">
       <motion.li v-if="props.tasks.length === 0" key="empty" class="task-list-empty" :initial="{ opacity: 0, height: 0 }" :animate="{ opacity: 1, height: 'auto' }" :exit="{ opacity: 0, height: 0, transition: { duration: 0.15, ease: [0.4, 0, 1, 1] } }" :style="{ overflow: 'hidden' }">
         <slot name="empty" />
+      </motion.li>
+      <motion.li v-if="starredHead" key="starred-head" class="starred-head" :initial="{ opacity: 0, height: 0 }" :animate="{ opacity: 1, height: 'auto' }" :exit="{ opacity: 0, height: 0, transition: { duration: 0.15, ease: [0.4, 0, 1, 1] } }" :style="{ overflow: 'hidden' }" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z" /></svg>
+        <span>星标</span>
       </motion.li>
       <TaskItem
         v-for="t in props.tasks"

@@ -139,6 +139,7 @@ export default defineConfig({
     'task-clear': 'ui-control text-subtle text-12.5px py-2px px-4px rounded-6px transition-colors duration-150 hover:text-danger',
     'task-list': 'list-none m-0 p-0 border-y border-y-solid border-edge',
     task: 'relative grid grid-cols-[18px_minmax(0,1fr)_auto] items-start gap-x-12px py-12px pr-12px pl-16px border-b border-b-solid border-edge transition-colors duration-150 hover:bg-hover focus-within:bg-hover',
+    'starred-head': 'flex items-center gap-6px px-16px pt-12px pb-6px text-gold text-11.5px font-500 select-none [&_svg]:w-12px [&_svg]:h-12px [&_svg]:shrink-0',
     'task-list-empty': 'border-b border-b-solid border-edge',
     'drop-indicator': 'absolute left-10px right-10px h-2px rounded-2px bg-accent z-1 pointer-events-none',
     'task-check': 'grid w-18px h-18px mt-5px',

@@ -13,6 +13,7 @@ export interface Task {
   due: string | null          // 到期时间，YYYY-MM-DD
   starred: boolean
   tags: string[]
+  position: number            // 项目内手动排序，越小越靠前（云端持久化）
   createdAt: number
   completedAt: number | null
 }

@@ -38,6 +38,31 @@ test('旧任务归入收件箱，保留完成状态和记录日期', async () =>
   assert.equal(state.filtered.value[0].done, true)
 })
 
+test('星标（收藏）任务优先展示在列表前面，组内保持原有顺序', () => {
+  state.setProject('inbox')
+  state.addTask('普通任务一')
+  state.addTask('普通任务二')
+  state.addTask('重要任务') // 新任务插在最前，此时数组顺序为：重要任务、普通任务二、普通任务一
+  state.toggleStar(state.tasks.value[2].id) // 给数组末尾的「普通任务一」加星标
+  assert.deepEqual(state.filtered.value.map(t => t.text), ['普通任务一', '重要任务', '普通任务二'])
+  state.toggleStar(state.tasks.value[2].id) // 取消星标后恢复原有顺序
+  assert.deepEqual(state.filtered.value.map(t => t.text), ['重要任务', '普通任务二', '普通任务一'])
+})
+
+test('拖拽排序重排项目内 position，移入其他项目时置顶', () => {
+  state.setProject('inbox')
+  state.addTask('任务甲')
+  state.addTask('任务乙')
+  state.addTask('任务丙') // 新任务插在最前：数组顺序为丙、乙、甲
+  const [bing, yi, jia] = state.tasks.value
+  state.reorder(jia.id, bing.id, true) // 甲拖到最前
+  assert.deepEqual(state.tasks.value.map(t => t.text), ['任务甲', '任务丙', '任务乙'])
+  assert.deepEqual(state.tasks.value.map(t => t.position), [0, 1, 2])
+  state.addProject('工作')
+  state.moveTask(jia.id, state.projectId.value)
+  assert.equal(jia.position, -1) // 移入空项目后置顶
+})
+
 test('任务按项目显示，过去和未来日期不影响可见性', () => {
   state.addTask('收件箱任务')
   state.addProject('工作')
