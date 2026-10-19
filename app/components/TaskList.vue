@@ -27,7 +27,10 @@ function onDragStart(e: DragEvent) {
   if (!task) return
   dragId = task.id
   draggingId.value = task.id
-  if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move'
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', task.id)
+  }
 }
 
 function onDragOver(e: DragEvent) {
@@ -40,6 +43,8 @@ function onDragOver(e: DragEvent) {
   const dragTask = props.tasks.find(t => t.id === dragId)
   const targetTask = props.tasks.find(t => t.id === li.dataset.id)
   if (!dragTask || !targetTask || dragTask.starred !== targetTask.starred) return
+  e.preventDefault() // 允许浏览器在这个有效目标上触发 drop
+  if (e.dataTransfer) e.dataTransfer.dropEffect = 'move'
   const r = li.getBoundingClientRect()
   const before = e.clientY < r.top + r.height / 2
   dropMark.value = { id: li.dataset.id!, before }
@@ -47,7 +52,10 @@ function onDragOver(e: DragEvent) {
 }
 
 function onDrop(e: DragEvent) {
-  if (dragId && dropTarget) reorder(dragId, dropTarget.id, dropTarget.before)
+  if (!dragId || !dropTarget) return
+  e.preventDefault()
+  reorder(dragId, dropTarget.id, dropTarget.before)
+  onDragEnd()
 }
 
 function onDragEnd() {

@@ -7,6 +7,7 @@ import { type SupabaseClient } from '@supabase/supabase-js'
 import type { Priority, Task } from '~/utils/parse'
 import { isProjectIcon, type ProjectIconName } from '../utils/projectIcons.ts'
 import { loadGuestWorkspace, saveGuestWorkspace } from '../utils/guestStorage.ts'
+import { createBackup, parseBackup, mergeBackup } from '../utils/backup.ts'
 
 export interface Project { id: string, name: string, icon: ProjectIconName }
 export type ConnMode = 'local' | 'cloud' | 'error'
@@ -194,7 +195,7 @@ async function initTasks(authClient: SupabaseClient | null = null, userId = '', 
           if (requestGeneration !== generation) return
         }
         mode.value = 'local'
-        const restoredProjectId = typeof snapshot.lastProjectId === 'string' ? snapshot.lastProjectId : previousProject
+        const restoredProjectId = typeof snapshot?.lastProjectId === 'string' ? snapshot.lastProjectId : projectId.value
         if (projects.value.some(p => p.id === restoredProjectId)) projectId.value = restoredProjectId
       } catch {
         if (requestGeneration !== generation) return
@@ -255,6 +256,31 @@ async function cloudWrite(fn: (c: SupabaseClient) => PromiseLike<unknown>) {
   }
 }
 
+// 访客备份只读写本地空间，先完成原子保存再更新界面。
+function exportGuestBackup() {
+  if (!localOnly.value || loading.value) throw new Error('请进入访客模式后导出本地备份。')
+  return createBackup({ tasks: tasks.value, projects: projects.value, lastProjectId: projectId.value })
+}
+
+async function importGuestBackup(source: string) {
+  if (!localOnly.value || !writable.value || saving.value) throw new Error('请等待本地保存完成后，在访客模式导入备份。')
+  const incoming = parseBackup(source)
+  const result = mergeBackup({ tasks: tasks.value, projects: projects.value, lastProjectId: projectId.value }, incoming)
+  const requestGeneration = generation
+  loading.value = true
+  try {
+    await saveGuestWorkspace(result.workspace)
+    if (requestGeneration !== generation) throw new Error('备份已保存至访客空间，请返回访客模式查看。')
+    tasks.value = result.workspace.tasks
+    projects.value = result.workspace.projects
+    hideToast()
+    undoState = null
+    return result
+  } finally {
+    if (requestGeneration === generation) loading.value = false
+  }
+}
+
 // ---------- 项目与任务列表 ----------
 function normalizeProject(project: Project): Project {
   return { ...project, icon: isProjectIcon(project.icon) ? project.icon : 'folder' }
@@ -280,6 +306,7 @@ const completedCount = computed(() => projectTasks.value.filter(t => t.done).len
 const viewTitle = computed(() => currentProject.value.name)
 
 function setProject(id: string) {
+  if (loading.value) return
   projectId.value = id
   search.value = ''
   saveLocal() // 立即记住项目位置，切换后马上刷新也能恢复
@@ -432,8 +459,8 @@ function reorder(dragId: string, targetId: string, before: boolean) {
     if (!before) to += 1
     tasks.value.splice(to, 0, item)
   }
-  saveLocal()
   renumber(item)
+  saveLocal()
 }
 
 export function useTasks() {
@@ -443,6 +470,6 @@ export function useTasks() {
     toastVisible, toastText, mode, syncError, loading, writable, localOnly, saving,
     // 动作
     initTasks, resetTasks, setProject, addProject, renameProject, moveTask, addTask, toggleDone, toggleStar, saveEdit,
-    removeTask, undoRemove, hideToast, clearDone, reorder, setDue,
+    removeTask, undoRemove, hideToast, clearDone, reorder, setDue, exportGuestBackup, importGuestBackup,
   }
 }

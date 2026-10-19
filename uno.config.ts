@@ -2,8 +2,8 @@ import { defineConfig, presetWind3 } from 'unocss'
 
 // 品牌令牌与全局基础样式；组件布局和状态全部使用 UnoCSS 工具类。
 const light = {
-  bg: '#FAF9F5',
-  panel: '#F0EEE5',
+  bg: '#FAFAFA',
+  panel: '#F0F0ED',
   card: '#FFFFFF',
   text: '#1F1E1D',
   'text-2': '#57534A',
@@ -19,8 +19,8 @@ const light = {
   p1: '#C93C2C',
   p2: '#C07A1F',
   p3: '#3D7DC8',
-  'toast-bg': '#262624',
-  'toast-text': '#FAF9F5',
+  'toast-bg': '#FFFFFF',
+  'toast-text': '#1F1E1D',
   shadow: '0 1px 2px rgba(28, 25, 23, 0.04), 0 4px 16px rgba(28, 25, 23, 0.05)',
   'shadow-focus': '0 0 0 3px var(--accent-soft)'
 }
@@ -42,10 +42,11 @@ const dark = {
   p1: '#E5735F',
   p2: '#E5A54B',
   p3: '#6FA8E8',
-  'toast-bg': '#F0EEE5',
-  'toast-text': '#1F1E1D',
+  'toast-bg': '#2C2B29',
+  'toast-text': '#E8E6DC',
   shadow: '0 1px 2px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.2)'
 }
+const appFont = '"Noto Sans SC Variable",ui-sans-serif,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif'
 const variables = (values: Record<string, string>) => Object.entries(values).map(([key, value]) => `--${key}:${value};`).join('')
 
 export default defineConfig({
@@ -62,8 +63,8 @@ export default defineConfig({
       danger: 'var(--danger)', gold: 'var(--gold)', p1: 'var(--p1)', p2: 'var(--p2)', p3: 'var(--p3)',
       toast: 'var(--toast-bg)', 'toast-text': 'var(--toast-text)',
     },
-    fontFamily: { serif: 'Georgia, "Times New Roman", serif', mono: 'ui-monospace, "SF Mono", Menlo, monospace' },
-    boxShadow: { soft: 'var(--shadow)', focus: 'var(--shadow-focus)', toast: '0 8px 28px rgba(0,0,0,0.22)' },
+    fontFamily: { sans: appFont, mono: 'ui-monospace, "SF Mono", Menlo, monospace' },
+    boxShadow: { soft: 'var(--shadow)', focus: 'var(--shadow-focus)' },
   },
   variants: [
     (matcher) => {
@@ -78,12 +79,16 @@ export default defineConfig({
     },
   ],
   preflights: [{ getCSS: () => `
-    :root{color-scheme:light;${variables(light)}}
+    :root{color-scheme:light;--paper:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='400'%20height='400'%3E%3Cfilter%20id='p'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.035%200.07'%20numOctaves='5'%20seed='8'%20stitchTiles='stitch'%20result='n'/%3E%3CfeDiffuseLighting%20in='n'%20lighting-color='%23ffffff'%20surfaceScale='2.2'%3E%3CfeDistantLight%20azimuth='45'%20elevation='50'/%3E%3C/feDiffuseLighting%3E%3CfeComponentTransfer%3E%3CfeFuncR%20type='linear'%20slope='0.08'%20intercept='0.92'/%3E%3CfeFuncG%20type='linear'%20slope='0.08'%20intercept='0.92'/%3E%3CfeFuncB%20type='linear'%20slope='0.08'%20intercept='0.92'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect%20width='400'%20height='400'%20filter='url(%23p)'/%3E%3C/svg%3E");${variables(light)}}
     @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;${variables(dark)}}}
     :root[data-theme="dark"]{color-scheme:dark;${variables(dark)}}
     *,*::before,*::after{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,-apple-system,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:${appFont};font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
     button,input,select{font:inherit;color:inherit}
+    /* 纸质纹理长在各表面的背景层里（与底色 multiply 混合），文字渲染在纹理之上、清晰度不受影响。
+       纹理由 feTurbulence + 漫反射光照生成拉丝纤维，再经 feComponentTransfer 把明度差压到 ≤8%，
+       与 UI 调好的强度一致；半透明表面（hover、强调底色）自动透出下层纹理 */
+    body,.bg-surface,.bg-panel,.bg-card,.toast{background-image:var(--paper);background-size:400px 400px;background-blend-mode:multiply}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:0s!important}}
   ` }],
   shortcuts: {
@@ -96,7 +101,7 @@ export default defineConfig({
     sidebar: 'w-264px shrink-0 bg-panel border-r border-r-solid border-edge flex flex-col py-16px px-12px gap-6px mobile:w-auto mobile:border-r-0 mobile:border-b mobile:border-b-solid mobile:py-12px mobile:px-16px mobile:gap-8px',
     brand: 'flex items-center gap-10px pt-4px px-8px pb-14px mobile:pt-0 mobile:px-0 mobile:pb-2px',
     logo: 'w-28px h-28px rounded-8px bg-accent-soft text-accent grid place-items-center shrink-0 [&_svg]:w-17px [&_svg]:h-17px',
-    'brand-name': 'font-serif text-16px font-600 tracking-[0.01em] flex-1',
+    'brand-name': 'font-sans text-16px font-600 tracking-[0.01em] flex-1',
     'icon-btn': 'ui-icon w-30px h-30px text-muted hover:bg-hover hover:text-ink',
     'icon-sun': 'block manual-dark:hidden system-dark:hidden',
     'icon-moon': 'hidden manual-dark:block system-dark:block',
@@ -107,7 +112,7 @@ export default defineConfig({
     'project-add': 'flex items-center gap-4px min-h-32px py-0 px-8px ui-control rounded-6px text-muted text-12px font-400 transition-colors duration-150 hover:bg-hover hover:text-ink ui-focus-ring [&_svg]:w-14px [&_svg]:h-14px',
     'project-row': 'relative isolate flex items-center min-w-0 min-h-38px pr-4px rounded-8px transition-colors duration-150',
     'project-selection': 'absolute top-0 left-0 right-0 h-38px z--1 rounded-8px bg-accent-soft pointer-events-none',
-    'project-name': 'truncate select-none',
+    'project-name': 'truncate select-none font-600',
     'project-rename': 'ui-icon ui-focus-ring shrink-0 w-28px h-28px text-subtle opacity-0 transition-opacity duration-150 group-hover/project:opacity-100 group-focus-within/project:opacity-100 hover:bg-hover hover:text-ink touch:opacity-100',
     'project-editor': 'w-full min-w-0 p-0 bg-transparent mobile:basis-full',
     'project-editor-row': 'grid grid-cols-[15px_minmax(0,1fr)_28px_28px] items-center gap-10px min-h-38px pt-0 pb-0 pr-4px pl-12px',
@@ -121,8 +126,8 @@ export default defineConfig({
     'project-editor-save': 'text-accent enabled:hover:text-accent-strong disabled:text-subtle disabled:opacity-40 disabled:cursor-default',
     main: 'flex-1 overflow-y-auto flex flex-col [scrollbar-gutter:stable] mobile:overflow-visible',
     'main-inner': 'w-full max-w-680px mx-auto pt-52px px-32px pb-28px flex flex-col flex-1 mobile:pt-32px mobile:px-20px mobile:pb-24px',
-    header: 'flex items-end justify-between gap-16px flex-wrap mb-24px',
-    'page-title': 'm-0 font-serif text-30px font-600 tracking-[0.005em] mobile:text-25px',
+    header: 'flex items-end justify-between gap-16px flex-wrap px-16px mb-24px',
+    'page-title': 'm-0 font-sans text-30px font-600 tracking-[0.005em] mobile:text-25px',
     'search-box': 'flex items-center gap-8px w-210px py-7px px-11px bg-card border border-solid border-edge rounded-10px text-subtle transition-[border-color,box-shadow] duration-150 focus-within:border-accent focus-within:shadow-focus mobile:w-full',
     'search-icon': 'w-14px h-14px shrink-0',
     'search-input': 'ui-input flex-1 p-0 text-13px placeholder:text-subtle',
@@ -184,11 +189,11 @@ export default defineConfig({
     'task-action': 'grid place-items-center w-28px h-28px p-0 ui-control rounded-8px text-subtle opacity-0 [transition-property:opacity,background,color] duration-150 group-hover/task:opacity-100 group-focus-within/task:opacity-100 focus-visible:opacity-100 hover:bg-hover ui-focus-ring mobile:opacity-100 touch:opacity-100 [&_svg]:w-15px [&_svg]:h-15px',
     'task-empty': 'text-center py-56px px-20px',
     'task-empty-logo': 'inline-grid place-items-center w-56px h-56px rounded-full bg-accent-soft text-accent mb-16px [&_svg]:w-26px [&_svg]:h-26px',
-    'task-empty-title': 'mt-0 mx-0 mb-6px font-serif text-17px text-muted',
+    'task-empty-title': 'mt-0 mx-0 mb-6px font-sans text-17px text-muted',
     'task-empty-sub': 'm-0 text-13px text-subtle',
-    toast: 'fixed left-1/2 bottom-28px [translate:-50%_0] flex items-center gap-14px py-10px pr-10px pl-16px bg-toast text-toast-text rounded-12px shadow-toast text-13.5px max-w-[min(90vw,480px)] z-10',
+    toast: 'fixed left-1/2 bottom-28px [translate:-50%_0] flex items-center gap-14px py-10px pr-10px pl-16px bg-toast text-toast-text border border-solid border-edge rounded-12px shadow-soft text-13.5px max-w-[min(90vw,480px)] z-10',
     'toast-undo': 'border-0 rounded-8px py-5px px-12px bg-accent text-white font-500 cursor-pointer transition-colors duration-150 shrink-0 hover:bg-accent-strong',
     'startup-screen': 'fixed inset-0 grid place-items-center bg-surface',
-    'startup-logo': 'text-40px text-accent animate-spin animate-duration-1600 motion-reduce:animate-none',
+    'startup-logo': 'text-accent [&_svg]:block [&_svg]:w-40px [&_svg]:h-40px',
   },
 })

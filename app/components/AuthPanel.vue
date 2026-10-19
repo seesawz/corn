@@ -5,8 +5,8 @@ const { busy, authError, signIn, continueAsGuest } = useAuth()
 <template>
   <main class="min-h-100dvh grid place-items-center p-24px bg-surface">
     <section class="w-full max-w-400px rounded-20px border border-solid border-edge bg-card p-32px shadow-soft" aria-labelledby="login-title">
-      <div class="text-accent text-36px mb-24px" aria-hidden="true">✳</div>
-      <h1 id="login-title" class="font-serif text-30px m-0">欢迎来到 Aster</h1>
+      <div class="text-accent mb-24px [&_svg]:w-36px [&_svg]:h-36px" aria-hidden="true"><BrandIcon /></div>
+      <h1 id="login-title" class="font-sans text-30px m-0">欢迎来到 corn</h1>
       <p class="text-muted mt-12px mb-32px">登录后，随时继续你的待办。<br>每个账号都有独立的任务与项目空间。</p>
       <div class="flex flex-col gap-12px">
         <button class="auth-provider" type="button" :disabled="busy" @click="signIn('github')">

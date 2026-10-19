@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { AnimatePresence, motion } from 'motion-v'
 import type { ProjectIconName } from '~/utils/projectIcons'
-const { projects, projectId, counts, setProject, addProject, renameProject, writable, saving } = useTasks()
+const { projects, projectId, counts, setProject, addProject, renameProject, writable, saving, localOnly, loading } = useTasks()
 const { user, displayName, busy, authError, signOut, configured, showLogin } = useAuth()
 const { toggleTheme } = useTheme()
 
@@ -44,11 +44,9 @@ function selectProject(id: string) {
   <aside ref="sidebarEl" class="sidebar">
     <motion.div class="brand" :initial="{ opacity: 0, x: -4 }" :animate="{ opacity: 1, x: 0 }">
       <span class="logo" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
-          <path d="M12 2.5v5.5M12 16v5.5M2.5 12H8M16 12h5.5M5.3 5.3l3.9 3.9M14.8 14.8l3.9 3.9M18.7 5.3l-3.9 3.9M9.2 14.8l-3.9 3.9" />
-        </svg>
+        <BrandIcon />
       </span>
-      <span class="brand-name">Aster</span>
+      <span class="brand-name">corn</span>
       <button class="icon-btn" title="切换深浅色主题" aria-label="切换深浅色主题" @click="toggleTheme">
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <circle cx="12" cy="12" r="4" /><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5 5l1.4 1.4M17.6 17.6L19 19M19 5l-1.4 1.4M6.4 17.6L5 19" />
@@ -75,8 +73,8 @@ function selectProject(id: string) {
           @save="saveProject"
           @cancel="closeProjectEditor()"
         />
-        <motion.div layout="position" :initial="{ opacity: 0, x: -4 }" :animate="{ opacity: 1, x: 0 }" v-for="project in projects" :key="project.id" :data-project-id="project.id" class="project-row group/project" :class="{ 'text-ink font-medium': projectId === project.id, 'hover:bg-hover': projectId !== project.id, 'pr-0 mobile:w-full': editorVisible && editingProjectId === project.id }">
-          <motion.span v-if="projectId === project.id" layout-id="selected-project" class="project-selection" :initial="false" aria-hidden="true" />
+        <motion.div layout="position" :initial="{ opacity: 0, x: -4 }" :animate="{ opacity: 1, x: 0 }" v-for="project in projects" :key="project.id" :data-project-id="project.id" class="project-row group/project" :class="{ 'text-ink': projectId === project.id, 'hover:bg-hover': projectId !== project.id, 'pr-0 mobile:w-full': editorVisible && editingProjectId === project.id }">
+          <motion.span v-if="projectId === project.id" class="project-selection" :initial="{ opacity: 0 }" :animate="{ opacity: 1 }" :transition="{ duration: 0.12, ease: 'easeOut' }" aria-hidden="true" />
           <ProjectNameEditor
             v-if="editorVisible && editingProjectId === project.id"
             :key="project.id"
@@ -93,7 +91,8 @@ function selectProject(id: string) {
             </button>
             <button
               class="nav-item"
-              :class="{ 'text-ink font-medium': projectId === project.id }"
+              :disabled="loading"
+              :class="{ 'text-ink': projectId === project.id }"
               :aria-current="projectId === project.id ? 'page' : undefined"
               @click="selectProject(project.id)"
             >
@@ -114,7 +113,7 @@ function selectProject(id: string) {
         <DefaultAvatar :seed="user?.email || displayName" />
         <div class="min-w-0 flex-1">
           <div class="text-13px font-medium truncate" :title="displayName">{{ displayName }}</div>
-          <div class="text-12px text-muted truncate" :title="user?.email">{{ user ? user.email : saving ? '正在保存…' : '仅保存在此浏览器' }}</div>
+          <div class="text-12px text-muted truncate" :title="user?.email" :aria-busy="!user && saving">{{ user ? user.email : '仅保存在此浏览器' }}</div>
         </div>
         <button
           v-if="user"
@@ -131,6 +130,7 @@ function selectProject(id: string) {
         </button>
         <button v-else-if="configured" type="button" class="project-add shrink-0" aria-label="登录账号" title="登录账号" @click="showLogin">登录</button>
       </div>
+      <GuestBackup v-if="localOnly" />
       <p v-if="authError" class="text-danger text-12px" role="alert">{{ authError }}</p>
     </div>
   </aside>

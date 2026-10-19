@@ -58,8 +58,8 @@ const recordStamp = computed(() => fmtStamp(props.task.done ? props.task.complet
 <template>
   <motion.li
     layout="position"
-    :initial="{ opacity: 0, y: 3 }"
-    :animate="{ opacity: dragging ? 0.35 : 1, y: 0 }"
+    :initial="{ opacity: 0 }"
+    :animate="{ opacity: dragging ? 0.35 : 1 }"
     :exit="{ opacity: 0, height: 0, paddingTop: 0, paddingBottom: 0, borderBottomWidth: 0, pointerEvents: 'none', transition: { duration: 0.16, ease: [0.4, 0, 1, 1] } }"
     :style="{ overflow: 'hidden' }"
     class="task group/task"

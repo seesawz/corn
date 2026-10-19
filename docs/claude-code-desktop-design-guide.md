@@ -1,11 +1,11 @@
-# Claude Code Desktop 风格 · Aster 项目设计指南
+# Claude Code Desktop 风格 · corn 项目设计指南
 
-本指南用于 Aster 的项目导航、新建与重命名流程。它是本项目的设计约定，不是 Anthropic 官方桌面端组件规范。
+本指南用于 corn 的项目导航、新建与重命名流程。它是本项目的设计约定，不是 Anthropic 官方桌面端组件规范。
 
 ## 参考与适配
 
 - [Claude Code Desktop 官方产品介绍](https://claude.com/resources/articles/claude-code-desktop-redesign)：以侧边栏组织工作，并支持按项目分组。本项目采用“左侧项目、右侧任务”的结构。
-- [Anthropic 官方品牌资源](https://github.com/anthropics/skills/blob/main/skills/brand-guidelines/SKILL.md)：参考暖白、墨色、灰色与赤陶橙的配色。品牌文档的字体规则主要面向品牌内容，本项目继续使用现有系统字体与衬线标题。
+- [Anthropic 官方品牌资源](https://github.com/anthropics/skills/blob/main/skills/brand-guidelines/SKILL.md)：参考暖白、墨色、灰色与赤陶橙的配色。品牌文档的字体规则主要面向品牌内容，本项目统一使用本地加载的 Noto Sans SC 可变字体。
 - 下文的尺寸、行内布局、按钮层级和交互是针对本应用制定的设计决定，不声称逐像素复刻 Claude Code Desktop。
 
 ## 视觉原则
@@ -34,7 +34,7 @@
 | 圆角 | 项目行和编辑容器 8 px，图标按钮 6–8 px |
 | 线条图标 | 统一 SVG，16 px，1.6–1.8 px 描边；不使用字符充当图标 |
 
-控件正文使用现有系统无衬线字体，13–14 px。分组标题和说明为 12–13 px。主内容标题沿用现有 Georgia 衬线字体，行内编辑不重复添加大标题。中文仍由系统字体显示，避免额外加载字体。
+控件正文使用本地加载的 Noto Sans SC 可变字体，13–14 px。分组标题和说明为 12–13 px。主内容标题与侧边栏项目名使用相同字体，字重为 600；行内编辑不重复添加大标题。字体按字符范围分片加载，由本站提供 WOFF2 文件，使用 SIL OFL 1.1 授权。
 
 ## 项目导航
 

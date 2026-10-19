@@ -17,12 +17,12 @@
 
 <script setup lang="ts">
 // DiceBear 免费头像服务：按 seed 生成稳定的卡通头像，无需 API 密钥
-const props = withDefaults(defineProps<{ seed?: string }>(), { seed: 'aster' })
+const props = withDefaults(defineProps<{ seed?: string }>(), { seed: 'corn' })
 
 const failed = ref(false)
 
 const avatarUrl = computed(() => {
-  const seed = encodeURIComponent(props.seed.trim() || 'aster')
+  const seed = encodeURIComponent(props.seed.trim() || 'corn')
   return `https://api.dicebear.com/9.x/notionists/svg?seed=${seed}&backgroundColor=ffd5dc,ffdfbf,d1d4f9,c0aede&radius=50`
 })
 </script>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import '@fontsource-variable/noto-sans-sc/index.css'
 import { AnimatePresence, motion, MotionConfig, useReducedMotion } from 'motion-v'
 
 const reducedMotion = useReducedMotion()
@@ -72,16 +73,16 @@ const emptyCopy = computed(() => search.value
 <template>
   <!-- 动效基调：进场 swift-out（快出缓停）更"贵"；布局位移用近临界弹簧（快速归位、几乎无回弹） -->
   <MotionConfig reduced-motion="user" :skip-animations="reducedMotion" :transition="{ duration: 0.2, ease: [0.22, 1, 0.36, 1], layout: { type: 'spring', stiffness: 400, damping: 35 } }">
-    <div v-if="!ready" class="startup-screen" role="status" aria-label="正在恢复登录状态"><span class="startup-logo" aria-hidden="true">✳</span></div>
+    <div v-if="!ready" class="startup-screen" role="status" aria-label="正在恢复登录状态"><span class="startup-logo" aria-hidden="true"><BrandIcon /></span></div>
     <AuthPanel v-else-if="configured && !user && !isGuestMode" />
     <div v-else :key="user?.id || 'guest'" class="app">
       <TheSidebar />
 
       <main class="main">
-        <motion.div class="main-inner" :initial="{ opacity: 0, y: 4 }" :animate="{ opacity: 1, y: 0 }">
+        <motion.div class="main-inner" :initial="{ opacity: 0 }" :animate="{ opacity: 1 }" :transition="{ duration: 0.16, ease: 'easeOut' }">
           <header class="header">
             <div class="header-text">
-              <motion.h1 class="page-title" :key="projectId" :initial="{ opacity: 0, y: 4 }" :animate="{ opacity: 1, y: 0 }">{{ viewTitle }}</motion.h1>
+              <motion.h1 class="page-title" :key="projectId" :initial="{ opacity: 0 }" :animate="{ opacity: 1 }" :transition="{ duration: 0.16, ease: 'easeOut' }">{{ viewTitle }}</motion.h1>
             </div>
             <AnimatePresence>
               <motion.div v-if="searchVisible" key="search" class="search-box" :initial="{ opacity: 0, y: -3 }" :animate="{ opacity: 1, y: 0 }" :exit="{ opacity: 0, y: -3, transition: { duration: 0.15, ease: [0.4, 0, 1, 1] } }">
@@ -115,9 +116,6 @@ const emptyCopy = computed(() => search.value
                 <button type="button" class="composer-submit" @click="loadAccount">{{ localOnly ? '重试本地存储' : '重新连接' }}</button>
               </div>
             </motion.div>
-            <motion.div v-else-if="mode === 'local'" key="local" :style="{ overflow: 'hidden' }" :initial="{ opacity: 0, height: 0 }" :animate="{ opacity: 1, height: 'auto' }" :exit="{ opacity: 0, height: 0, transition: { duration: 0.15, ease: [0.4, 0, 1, 1] } }">
-              <div class="mb-20px text-muted text-13px">访客模式：任务和项目仅保存在此浏览器。</div>
-            </motion.div>
           </AnimatePresence>
           <AnimatePresence :initial="false">
             <motion.div v-if="filtered.length > 0" key="list-head" :style="{ overflow: 'hidden' }" :initial="{ opacity: 0, height: 0 }" :animate="{ opacity: 1, height: 'auto' }" :exit="{ opacity: 0, height: 0, transition: { duration: 0.15, ease: [0.4, 0, 1, 1] } }">
@@ -132,9 +130,7 @@ const emptyCopy = computed(() => search.value
             <template #empty>
               <div class="task-empty">
                 <motion.span class="task-empty-logo" :initial="{ scale: 0.92 }" :animate="{ scale: 1 }" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                    <path d="M12 2.5v5.5M12 16v5.5M2.5 12H8M16 12h5.5M5.3 5.3l3.9 3.9M14.8 14.8l3.9 3.9M18.7 5.3l-3.9 3.9M9.2 14.8l-3.9 3.9" />
-                  </svg>
+                  <BrandIcon />
                 </motion.span>
                 <p class="task-empty-title">{{ emptyCopy.title }}</p>
                 <p class="task-empty-sub">{{ emptyCopy.sub }}</p>

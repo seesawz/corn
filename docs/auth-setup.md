@@ -18,7 +18,7 @@
 
 在 GitHub → Settings → Developer settings → OAuth Apps 创建应用：
 
-- Homepage URL：`https://seesawz.github.io/aster-todo/`（若使用其他域名，以实际部署地址为准）。
+- Homepage URL：`https://seesawz.github.io/corn/`（若使用其他域名，以实际部署地址为准）。
 - Authorization callback URL：`https://lhlhwzijxacgiosussjt.supabase.co/auth/v1/callback`。
 
 在 Supabase → Authentication → Sign In / Providers → GitHub 启用提供商，填写该 OAuth App 的 Client ID 和 Client Secret 并保存。Secret 仅放 Supabase 后台，不放前端环境变量或 Git 仓库。
@@ -27,15 +27,15 @@
 
 在 Authentication → URL Configuration 设置：
 
-- Site URL：`https://seesawz.github.io/aster-todo/`。
-- Redirect URLs：添加 `https://seesawz.github.io/aster-todo/`、`http://localhost:3000/aster-todo/`。
-- 若使用 `127.0.0.1`、其他端口或自定义域名，添加完全匹配的地址，包含 `/aster-todo/` 与结尾斜线。
+- Site URL：`https://seesawz.github.io/corn/`。
+- Redirect URLs：添加 `https://seesawz.github.io/corn/`、`http://localhost:3000/corn/`。
+- 若使用 `127.0.0.1`、其他端口或自定义域名，添加完全匹配的地址，包含 `/corn/` 与结尾斜线。
 
 GitHub 的 callback 是 Supabase 地址；Supabase 的 Redirect URLs 才是本应用地址，两者用途不同。
 
 ## 4. 本地与部署
 
-本地 `.env`（已加入 Git 忽略）需要 `NUXT_PUBLIC_SUPABASE_URL` 和 `NUXT_PUBLIC_SUPABASE_KEY`，公钥使用 publishable key。运行 `pnpm install`、`pnpm dev` 后打开 `http://localhost:3000/aster-todo/`。
+本地 `.env`（已加入 Git 忽略）需要 `NUXT_PUBLIC_SUPABASE_URL` 和 `NUXT_PUBLIC_SUPABASE_KEY`，公钥使用 publishable key。运行 `pnpm install`、`pnpm dev` 后打开 `http://localhost:3000/corn/`。
 
 GitHub Actions 构建不会读取本地 `.env`。请在仓库 Settings → Secrets and variables → Actions 配置同名的两个 Secrets。随后 `pnpm generate` 的产物可通过已有工作流部署到 GitHub Pages。
 

@@ -7,9 +7,9 @@ export default defineNuxtConfig({
 
   app: {
     // GitHub 项目页托管在仓库子路径下
-    baseURL: '/aster-todo/',
+    baseURL: '/corn/',
     head: {
-      title: 'Aster — 待办清单',
+      title: 'corn — 待办清单',
       htmlAttrs: { lang: 'zh-CN' },
       meta: [
         { charset: 'utf-8' },
@@ -18,7 +18,8 @@ export default defineNuxtConfig({
       ],
       link: [{
         rel: 'icon',
-        href: "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23D97757'%20stroke-width='2.4'%20stroke-linecap='round'%3E%3Cpath%20d='M12%202.5v5.5M12%2016v5.5M2.5%2012H8M16%2012h5.5M5.3%205.3l3.9%203.9M14.8%2014.8l3.9%203.9M18.7%205.3l-3.9%203.9M9.2%2014.8l-3.9%203.9'/%3E%3C/svg%3E",
+        type: 'image/svg+xml',
+        href: '/corn/icon.svg',
       }],
     },
     spaLoadingTemplate: 'app/spa-loading-template.html',
