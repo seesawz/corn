@@ -67,8 +67,11 @@ function onDragEnd() {
 </script>
 
 <template>
-  <ul
+  <motion.ul
     class="task-list"
+    :initial="{ opacity: 0 }"
+    :animate="{ opacity: 1 }"
+    :transition="{ duration: 0.12, ease: 'easeOut' }"
     @dragstart="onDragStart"
     @dragend="onDragEnd"
     @dragover="onDragOver"
@@ -94,5 +97,5 @@ function onDragEnd() {
     <motion.li layout="position" class="task-add-row">
       <TaskComposer ref="composer" />
     </motion.li>
-  </ul>
+  </motion.ul>
 </template>

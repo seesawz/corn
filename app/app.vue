@@ -117,7 +117,7 @@ const emptyCopy = computed(() => search.value
               </div>
             </motion.div>
           </AnimatePresence>
-          <AnimatePresence :initial="false">
+          <AnimatePresence :key="projectId" :initial="false">
             <motion.div v-if="filtered.length > 0" key="list-head" :style="{ overflow: 'hidden' }" :initial="{ opacity: 0, height: 0 }" :animate="{ opacity: 1, height: 'auto' }" :exit="{ opacity: 0, height: 0, transition: { duration: 0.15, ease: [0.4, 0, 1, 1] } }">
               <div class="list-head">
                 <span>{{ search ? '搜索结果' : '任务' }} · {{ filtered.length }}</span>
@@ -126,7 +126,7 @@ const emptyCopy = computed(() => search.value
             </motion.div>
           </AnimatePresence>
           <div :inert="!writable || undefined" :aria-busy="loading">
-          <TaskList ref="taskInput" :tasks="filtered">
+          <TaskList :key="projectId" ref="taskInput" :tasks="filtered">
             <template #empty>
               <div class="task-empty">
                 <motion.span class="task-empty-logo" :initial="{ scale: 0.92 }" :animate="{ scale: 1 }" aria-hidden="true">
